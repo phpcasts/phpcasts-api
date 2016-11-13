@@ -1,2 +1,2 @@
-# phpcasts-api
-PHPCasts web API
+# PHPCasts Web API
+To be completed
