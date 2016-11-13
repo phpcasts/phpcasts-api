@@ -1,0 +1,57 @@
+version: '2'
+
+services:
+
+  nginx:
+    build: ./.docker/nginx
+    volumes_from:
+      - volumes_source
+    volumes:
+      - ./data/logs/nginx/:/var/log/nginx
+    ports:
+      - "8080:80"
+      - "4343:443"
+    links:
+      - php-fpm
+
+  php-fpm:
+    build:
+      context: ./.docker/php-fpm
+      dockerfile: Dockerfile-70
+    volumes_from:
+      - volumes_source
+    expose:
+      - "9000"
+    links:
+      - workspace
+
+  mysql:
+    build: ./.docker/mysql
+    volumes_from:
+      - volumes_data
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: phpcasts-api
+      MYSQL_USER: default-user
+      MYSQL_PASSWORD: iloverandompasswordsbutthisonewilldo
+      MYSQL_ROOT_PASSWORD: root
+
+  workspace:
+    build:
+      context: ./.docker/workspace
+      args:
+        - INSTALL_PRESTISSIMO=false
+    volumes_from:
+      - volumes_source
+    tty: true
+
+  volumes_source:
+    build: ./.docker/volumes/application
+    volumes:
+        - ./:/var/www/phpcasts-api
+
+  volumes_data:
+    build: ./.docker/volumes/data
+    volumes:
+      - ./.docker/volumes/mysql:/var/lib/mysql
